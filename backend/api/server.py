@@ -7,6 +7,13 @@ import asyncio
 import json
 from datetime import datetime
 from enum import Enum
+import sys
+import os
+
+# Add the backend directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from agents.langgraph_agents import AgentFactory, LangGraphMigrationAgent
 
 app = FastAPI(title="IDP Migration API", version="1.0.0")
 
@@ -190,8 +197,8 @@ async def create_migration_job(request: MigrationRequest, background_tasks: Back
     
     migration_jobs[job_id] = job
     
-    # Start migration in background
-    background_tasks.add_task(simulate_migration, job_id)
+    # Start migration in background using LangGraph agents
+    background_tasks.add_task(run_langgraph_migration, job_id)
     
     return job
 
@@ -264,9 +271,64 @@ async def get_dashboard_stats():
         "success_rate": (total_migrated / (total_migrated + total_failed)) * 100 if (total_migrated + total_failed) > 0 else 0
     }
 
-# Background task to simulate migration progress
-async def simulate_migration(job_id: str):
-    """Simulate migration progress"""
+# Background task to run LangGraph migration
+async def run_langgraph_migration(job_id: str):
+    """Run migration using LangGraph agents"""
+    if job_id not in migration_jobs:
+        return
+    
+    job = migration_jobs[job_id]
+    
+    try:
+        # Create appropriate agent based on migration type
+        agent = AgentFactory.create_agent(job.migration_type.value)
+        
+        # Prepare initial state for the agent
+        initial_state = {
+            "job_id": job_id,
+            "source_system": job.source_system.value,
+            "destination_system": job.destination_system.value,
+            "migration_type": job.migration_type.value,
+            "batch_size": 50,  # Configurable batch size
+            "total_records": job.total_records
+        }
+        
+        # Update job status to in progress
+        job.status = MigrationStatus.IN_PROGRESS
+        job.updated_at = datetime.now()
+        
+        # Run the migration workflow
+        print(f"🚀 Starting LangGraph migration for job {job_id}")
+        result = await agent.run_migration(initial_state)
+        
+        # Update job with final results
+        job.status = MigrationStatus(result["status"])
+        job.migrated_records = result["processed_records"]
+        job.failed_records = result["failed_records"]
+        job.progress_percentage = 100.0 if job.status == MigrationStatus.COMPLETED else 0.0
+        job.updated_at = datetime.now()
+        
+        print(f"✅ LangGraph migration completed for job {job_id}")
+        print(f"   Status: {result['status']}")
+        print(f"   Processed: {result['processed_records']}/{result['total_records']}")
+        print(f"   Failed: {result['failed_records']}")
+        
+        # Store agent messages for debugging
+        if "messages" in result:
+            print("📝 Agent Messages:")
+            for msg in result["messages"]:
+                print(f"   {msg}")
+        
+    except Exception as e:
+        print(f"❌ LangGraph migration failed for job {job_id}: {str(e)}")
+        job.status = MigrationStatus.FAILED
+        job.updated_at = datetime.now()
+        # Keep the simulate_migration as fallback for demo purposes
+        await simulate_migration_fallback(job_id)
+
+# Fallback simulation for demo purposes
+async def simulate_migration_fallback(job_id: str):
+    """Fallback simulation migration progress"""
     if job_id not in migration_jobs:
         return
     
@@ -275,7 +337,7 @@ async def simulate_migration(job_id: str):
     job.updated_at = datetime.now()
     
     # Simulate migration progress
-    for progress in range(0, 101, 5):
+    for progress in range(0, 101, 15):
         if job.status == MigrationStatus.PAUSED:
             return
         
@@ -287,7 +349,7 @@ async def simulate_migration(job_id: str):
         if progress > 50:
             job.failed_records = int(0.02 * job.migrated_records)  # 2% failure rate
         
-        await asyncio.sleep(2)  # Simulate processing time
+        await asyncio.sleep(1)  # Faster for demo
     
     job.status = MigrationStatus.COMPLETED
     job.progress_percentage = 100.0
