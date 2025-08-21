@@ -45,7 +45,9 @@ if %ERRORLEVEL% NEQ 0 (
     
     if !ERRORLEVEL!==1 (
         echo Installing LangGraph...
-        call fix_rust_error.bat
+        REM call fix_rust_error.bat
+        call setup_langgraph_windows.bat
+
         if !ERRORLEVEL! NEQ 0 (
             echo ❌ LangGraph installation failed. Using simple agents.
             goto :simple_agents
