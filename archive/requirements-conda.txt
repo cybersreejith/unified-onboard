@@ -1,0 +1,22 @@
+# Conda-compatible requirements for LangGraph on Windows
+# Use with: conda install -c conda-forge <package>
+
+# Core dependencies (install via conda)
+# conda install -c conda-forge python=3.11
+# conda install -c conda-forge pydantic
+# conda install -c conda-forge fastapi
+# conda install -c conda-forge uvicorn
+# conda install -c conda-forge requests
+# conda install -c conda-forge numpy
+# conda install -c conda-forge pandas
+
+# LangGraph specific (install via pip after conda setup)
+langgraph==0.0.69
+langchain==0.1.20
+langchain-core==0.1.52
+langchain-community==0.0.38
+
+# Additional dependencies
+python-multipart==0.0.6
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4

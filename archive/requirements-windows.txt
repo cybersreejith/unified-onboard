@@ -1,0 +1,29 @@
+# Windows-compatible requirements (avoids Rust compilation issues)
+fastapi==0.104.1
+uvicorn==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+requests==2.31.0
+
+# Use pre-compiled wheels for these packages
+--find-links https://download.pytorch.org/whl/torch_stable.html
+
+# Alternative lightweight agent framework (no Rust dependencies)
+# Instead of LangGraph, we'll use a simplified agent implementation
+asyncio-mqtt==0.16.1
+aiofiles==23.2.1
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# For data processing
+pandas==2.1.4
+numpy==1.24.4
+
+# For HTTP client
+httpx==0.25.2
+
+# For JSON handling
+orjson==3.9.10
+
+# For async support
+anyio==4.2.0

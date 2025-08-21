@@ -1,0 +1,41 @@
+# fastapi==0.104.1
+# uvicorn==0.24.0
+# pydantic==2.5.0
+# requests==2.31.0
+# python-multipart==0.0.6
+# aiofiles==23.2.1
+# sqlalchemy==2.0.23
+# alembic==1.13.1
+# python-jose[cryptography]==3.3.0
+# passlib[bcrypt]==1.7.4
+# python-dotenv==1.0.0
+# websockets==12.0
+
+# # Agent Frameworks
+# langgraph==0.2.16
+# langchain-core>=0.2.27,<0.3
+# langchain>=0.2.0,<0.3
+# langchain-community>=0.2.0,<0.3
+# typing-extensions>=4.8.0
+
+# =============
+
+# Core dependencies with specific versions to ensure wheels
+# numpy==1.24.3
+pydantic>=2.0.0
+pydantic-core
+typing-extensions>=4.8.0
+
+# LangChain ecosystem (install without numpy dependencies first)
+langchain-core
+langgraph
+langchain
+langchain-community
+
+# Web framework and server
+fastapi==0.104.1
+uvicorn==0.24.0
+
+# HTTP and utility libraries
+requests==2.31.0
+python-multipart==0.0.6
